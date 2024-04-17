@@ -46,8 +46,8 @@ public class PayOrderNotifyResult extends BasePayResult {
     /**
      * 用户在商户的id
      */
-    @XStreamAlias("orderType")
-    private String order_type;
+    @XStreamAlias("order_type")
+    private String orderType;
     /**
      * 支付完成时间，订单支付时间，格式为yyyyMMddHHmmss
      */
@@ -150,6 +150,30 @@ public class PayOrderNotifyResult extends BasePayResult {
     @Override
     protected void loadXml(Document d) {
         userId = readXmlString(d, "user_id");
+        orderAmt = readXmlInteger(d, "order_amt");
+        settleOrderAmt = readXmlInteger(d,"settle_order_amt");
+        currType = readXmlString(d,"curr_type");
+        transactionId = readXmlString(d,"transaction_id");
+        mchntOrderNo = readXmlString(d,"mchnt_order_no");
+        orderType = readXmlString(d,"order_type");
+        txnFinTs = readXmlString(d,"txn_fin_ts");
+        reservedFySettleDt = readXmlString(d,"reserved_fy_settle_dt");
+        reservedCouponFee = readXmlString(d,"reserved_coupon_fee");
 
+        reservedBuyerLogonId = readXmlString(d,"reserved_buyer_logon_id");
+        reservedFundBillList = readXmlString(d,"reserved_fund_bill_list");
+        reservedFyTraceNo = readXmlString(d,"reserved_fy_trace_no");
+        reservedChannelOrderId = readXmlString(d,"reserved_channel_order_id");
+        reservedIsCredit = readXmlString(d,"reserved_is_credit");
+        reservedAddnInf = readXmlString(d,"reserved_addn_inf");
+
+        reservedSettlementAmt = readXmlInteger(d,"reserved_settlement_amt");
+        reservedBankType = readXmlString(d,"reserved_bank_type");
+        reservedPromotionDetail = readXmlString(d,"reserved_promotion_detail");
+        reservedHbIsSeller = readXmlString(d,"reserved_hb_is_seller");
+        reservedServiceChargeFlag = readXmlString(d,"reserved_service_charge_flag");
+        reservedVoucherDetailList = readXmlString(d,"reserved_voucher_detail_list");
+        reservedDiscountGoodsDetail = readXmlString(d,"reserved_discount_goods_detail");
+        reservedSubMchntCd = readXmlString(d,"reserved_sub_mchnt_cd");
     }
 }
