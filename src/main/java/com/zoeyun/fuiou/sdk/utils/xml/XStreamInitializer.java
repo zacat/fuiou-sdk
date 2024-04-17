@@ -87,7 +87,7 @@ public class XStreamInitializer {
         // setup proper security by limiting which classes can be loaded by XStream
         xstream.addPermission(NoTypePermission.NONE);
         xstream.addPermission(new WildcardTypePermission(new String[]{
-                "me.zoeyun.fuiou.**"
+                "com.zoeyun.fuiou.**"
         }));
         if (null == classLoader) {
             classLoader = Thread.currentThread().getContextClassLoader();

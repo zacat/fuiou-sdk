@@ -6,6 +6,7 @@ import com.zoeyun.fuiou.sdk.config.SdkConfig;
 import com.zoeyun.fuiou.sdk.error.SdkErrorException;
 import com.zoeyun.fuiou.sdk.error.SdkRuntimeException;
 import com.zoeyun.fuiou.sdk.utils.BeanUtils;
+import com.zoeyun.fuiou.sdk.utils.RandomUtils;
 import com.zoeyun.fuiou.sdk.utils.SignUtils;
 import com.zoeyun.fuiou.sdk.utils.XmlConfig;
 import com.zoeyun.fuiou.sdk.utils.xml.XStreamInitializer;
@@ -113,7 +114,8 @@ public abstract class BasePayRequest implements Serializable {
         }
         XStream xstream = XStreamInitializer.getInstance();
         xstream.processAnnotations(this.getClass());
-        return xstream.toXML(this);
+        String xmlStr = "<?xml version=\"1.0\" encoding=\"GBK\" standalone=\"yes\"?>\n" + xstream.toXML(this);
+        return xmlStr;
     }
 
     /**
@@ -134,7 +136,7 @@ public abstract class BasePayRequest implements Serializable {
         map.put("version", version);
         map.put("ins_cd", insCd);
         map.put("mchnt_cd", mchntCd);
-        map.put("termId", termId);
+        map.put("term_id", termId);
         storeMap(map);
         return map;
     }
@@ -163,7 +165,7 @@ public abstract class BasePayRequest implements Serializable {
         this.checkFields();
 
         if (StringUtils.isBlank(getRandomStr())) {
-            this.setRandomStr(String.valueOf(System.currentTimeMillis()));
+            this.setRandomStr(RandomUtils.getRandomStr());
         }
         if (StringUtils.isBlank(getVersion())) {
             this.setVersion("1.0");
@@ -177,6 +179,7 @@ public abstract class BasePayRequest implements Serializable {
         if (StringUtils.isBlank(getTermId())) {
             this.setTermId(config.getTermId());
         }
+
         //设置签名字段的值
         this.setSign(SignUtils.createSign(this, config.getPrivateKey(), this.getIgnoredParamsForSign()));
     }

@@ -36,3 +36,4 @@ build/
 
 ### Mac OS ###
 .DS_Store
+src/test/java/com/zoeyun/fuiou/sdk/service/impl/PayServideImplTest.java

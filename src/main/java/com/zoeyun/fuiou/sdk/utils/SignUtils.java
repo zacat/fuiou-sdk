@@ -51,16 +51,24 @@ public class SignUtils {
             try {
                 boolean isAccessible = field.isAccessible();
                 field.setAccessible(true);
-                if (field.get(bean) == null) {
-                    field.setAccessible(isAccessible);
-                    continue;
-                }
+                //if (field.get(bean) == null) {
+                //    field.setAccessible(isAccessible);
+                //    continue;
+                //}
 
                 if (field.isAnnotationPresent(XStreamAlias.class)) {
-                    result.put(field.getAnnotation(XStreamAlias.class).value(), field.get(bean).toString());
+                    if (field.get(bean) == null) {
+                        result.put(field.getAnnotation(XStreamAlias.class).value(), "");
+                    } else {
+                        result.put(field.getAnnotation(XStreamAlias.class).value(), field.get(bean).toString());
+                    }
                 } else if (!Modifier.isStatic(field.getModifiers())) {
                     //忽略掉静态成员变量
-                    result.put(field.getName(), field.get(bean).toString());
+                    if (field.get(bean) == null) {
+                        result.put(field.getName(), "");
+                    } else {
+                        result.put(field.getName(), field.get(bean).toString());
+                    }
                 }
 
                 field.setAccessible(isAccessible);
@@ -106,13 +114,13 @@ public class SignUtils {
         for (String key : new TreeMap<>(params).keySet()) {
             String value = params.get(key);
             boolean shouldSign = false;
-            if (StringUtils.isNotEmpty(value) && !ArrayUtils.contains(ignoredParams, key)
+            if (!ArrayUtils.contains(ignoredParams, key)
                     && !NO_SIGN_PARAMS.contains(key)) {
                 shouldSign = true;
             }
 
             if (key.length() >= 8 && key.substring(0, 8).equalsIgnoreCase("reserved")) {
-                shouldSign = true;
+                shouldSign = false;
             }
 
             if (shouldSign) {
@@ -120,11 +128,11 @@ public class SignUtils {
             }
         }
 
-        String sign = toSign.toString();
-        if (StringUtils.endsWith(sign, "&")) {
-            sign = StringUtils.removeEnd(sign, "&");
+        String preSignStr = toSign.toString();
+        if (StringUtils.endsWith(preSignStr, "&")) {
+            preSignStr = StringUtils.removeEnd(preSignStr, "&");
         }
-
+        System.out.println("==============================待签名字符串==============================\r\n" + preSignStr);
         // 解密由base64编码的私钥
         byte[] bytesKey = (new BASE64Decoder()).decodeBuffer(privateKey);
         // 构造PKCS8EncodedKeySpec对象
@@ -136,8 +144,9 @@ public class SignUtils {
         // 用私钥对信息生成数字签名
         java.security.Signature signature = java.security.Signature.getInstance("MD5WithRSA");
         signature.initSign(priKey);
-        signature.update(sign.getBytes("GBK"));
-        return (new BASE64Encoder()).encodeBuffer(signature.sign()).replace("\r\n", "");
+        signature.update(preSignStr.getBytes("GBK"));
+        String sign = (new BASE64Encoder()).encodeBuffer(signature.sign());
+        return sign.replace("\r\n", "");
     }
 
     /**
@@ -147,8 +156,8 @@ public class SignUtils {
      * @param publicKey 校验的签名Key
      * @return true - 签名校验成功，false - 签名校验失败
      */
-    public static boolean checkSign(Object xmlBean, String publicKey) {
-        return checkSign(xmlBean2Map(xmlBean), publicKey, new String[]{});
+    public static boolean checkSign(Object xmlBean, String publicKey, String sign) {
+        return checkSign(xmlBean2Map(xmlBean), publicKey, new String[]{}, sign);
     }
 
     /**
@@ -158,8 +167,8 @@ public class SignUtils {
      * @param publicKey 校验的签名Key
      * @return true - 签名校验成功，false - 签名校验失败
      */
-    public static boolean checkSign(Object xmlBean, String publicKey, String[] ignoredParams) {
-        return checkSign(xmlBean2Map(xmlBean), publicKey, ignoredParams);
+    public static boolean checkSign(Object xmlBean, String publicKey, String[] ignoredParams, String sign) {
+        return checkSign(xmlBean2Map(xmlBean), publicKey, ignoredParams, sign);
     }
 
     /**
@@ -170,18 +179,18 @@ public class SignUtils {
      * @return true - 签名校验成功，false - 签名校验失败
      */
     @SneakyThrows
-    public static boolean checkSign(Map<String, String> params, String publicKey, String[] ignoredParams) {
+    public static boolean checkSign(Map<String, String> params, String publicKey, String[] ignoredParams, String sign) {
         StringBuilder toSign = new StringBuilder();
         for (String key : new TreeMap<>(params).keySet()) {
             String value = params.get(key);
             boolean shouldSign = false;
-            if (StringUtils.isNotEmpty(value) && !ArrayUtils.contains(ignoredParams, key)
+            if (!ArrayUtils.contains(ignoredParams, key)
                     && !NO_SIGN_PARAMS.contains(key)) {
                 shouldSign = true;
             }
 
             if (key.length() >= 8 && key.substring(0, 8).equalsIgnoreCase("reserved")) {
-                shouldSign = true;
+                shouldSign = false;
             }
 
             if (shouldSign) {
@@ -189,10 +198,12 @@ public class SignUtils {
             }
         }
 
-        String sign = toSign.toString();
-        if (StringUtils.endsWith(sign, "&")) {
-            sign = StringUtils.removeEnd(sign, "&");
+        String preSignStr = toSign.toString();
+        if (StringUtils.endsWith(preSignStr, "&")) {
+            preSignStr = StringUtils.removeEnd(preSignStr, "&");
         }
+
+        System.out.println("==============================待签名字符串==============================\r\n" + preSignStr);
         // 解密由base64编码的公钥
         byte[] keyBytes = decryptBASE64(publicKey);
         // 构造X509EncodedKeySpec对象
@@ -203,8 +214,8 @@ public class SignUtils {
         PublicKey pubKey = keyFactory.generatePublic(keySpec);
         Signature signature = Signature.getInstance("MD5withRSA");
         signature.initVerify(pubKey);
-        signature.update(sign.getBytes("GBK"));
-        return signature.verify(decryptBASE64(params.get("sign")));
+        signature.update(preSignStr.getBytes("GBK"));
+        return signature.verify(decryptBASE64(sign));
     }
 
 

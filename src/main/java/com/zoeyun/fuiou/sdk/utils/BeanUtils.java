@@ -11,6 +11,7 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class BeanUtils {
 
@@ -48,7 +49,7 @@ public class BeanUtils {
         }
 
         if (!requiredFields.isEmpty()) {
-            String msg = String.format("必填字段【%s】必须提供值！", requiredFields);
+            String msg = String.format("必填字段【%s】必须提供值！", requiredFields.stream().collect(Collectors.joining(",")));
             log.debug(msg);
             throw new SdkErrorException(msg);
         }

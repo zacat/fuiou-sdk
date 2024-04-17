@@ -33,7 +33,7 @@ public abstract class BasePayServiceImpl implements PayService {
     @Override
     public PreCreateResult preCreate(PreCreateRequest request) throws SdkErrorException {
         request.checkAndSign(sdkConfig);
-        String url = this.getPayBaseUrl() + "/preCreate";
+        String url = this.getPayBaseUrl() + "/wxPreCreate";
         String responseContent = this.post(url, request.toXML(), true);
         PreCreateResult result = BasePayResult.fromXML(responseContent, PreCreateResult.class);
         result.checkResult(sdkConfig, true);

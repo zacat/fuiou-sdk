@@ -26,6 +26,7 @@ import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 import java.io.ByteArrayInputStream;
 import java.io.Serializable;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
@@ -223,7 +224,7 @@ public abstract class BasePayResult implements Serializable {
             final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
             factory.setExpandEntityReferences(false);
             factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
-            return factory.newDocumentBuilder().parse(new ByteArrayInputStream(content.getBytes(StandardCharsets.UTF_8)));
+            return factory.newDocumentBuilder().parse(new ByteArrayInputStream(content.getBytes(Charset.forName("GBK"))));
         } catch (Exception e) {
             throw new SdkRuntimeException("非法的xml文本内容：\n" + this.xmlString, e);
         }
@@ -265,16 +266,24 @@ public abstract class BasePayResult implements Serializable {
     }
 
     /**
+     * 签名时，忽略的参数.
+     *
+     * @return the string [ ]
+     */
+    protected String[] getIgnoredParamsForSign() {
+        return new String[0];
+    }
+    /**
      * 校验返回结果签名.
      *
      * @param checkSuccess 是否同时检查结果是否成功
      * @param config       支付配置参数
      * @throws SdkErrorException the wx pay exception
      */
-    public void checkResult(SdkConfig config,boolean checkSuccess) throws SdkErrorException {
+    public void checkResult(SdkConfig config, boolean checkSuccess) throws SdkErrorException {
         //校验返回结果签名
         Map<String, String> map = toMap();
-        if (getSign() != null && !SignUtils.checkSign(map, config.getPublicKey())) {
+        if (getSign() != null && !SignUtils.checkSign(map, config.getPublicKey(), getIgnoredParamsForSign(), this.getSign())) {
             this.getLogger().debug("校验结果签名失败，参数：{}", map);
             throw new SdkErrorException("参数格式校验错误！");
         }
