@@ -6,14 +6,11 @@ import com.thoughtworks.xstream.annotations.XStreamAlias;
 import com.zoeyun.fuiou.sdk.bean.BasePayRequest;
 import com.zoeyun.fuiou.sdk.bean.BasePayResult;
 import lombok.SneakyThrows;
-import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import sun.misc.BASE64Decoder;
-import sun.misc.BASE64Encoder;
-
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
@@ -135,7 +132,8 @@ public class SignUtils {
         }
         //System.out.println("==============================待签名字符串==============================\r\n" + preSignStr);
         // 解密由base64编码的私钥
-        byte[] bytesKey = (new BASE64Decoder()).decodeBuffer(privateKey);
+        //byte[] bytesKey = (new BASE64Decoder()).decodeBuffer(privateKey);
+        byte[] bytesKey = Base64.decodeBase64(privateKey);
         // 构造PKCS8EncodedKeySpec对象
         PKCS8EncodedKeySpec pkcs8KeySpec = new PKCS8EncodedKeySpec(bytesKey);
         // KEY_ALGORITHM 指定的加密算法
@@ -146,7 +144,8 @@ public class SignUtils {
         java.security.Signature signature = java.security.Signature.getInstance("MD5WithRSA");
         signature.initSign(priKey);
         signature.update(preSignStr.getBytes("GBK"));
-        String sign = (new BASE64Encoder()).encodeBuffer(signature.sign());
+        //String sign = (new BASE64Encoder()).encodeBuffer(signature.sign()).replace("\r\n", "");
+        String sign = Base64.encodeBase64String(signature.sign());
         return sign.replace("\r\n", "");
     }
 
@@ -228,7 +227,8 @@ public class SignUtils {
      * @throws Exception
      */
     public static String encryptBASE64(byte[] key) throws Exception {
-        return (new BASE64Encoder()).encodeBuffer(key);
+        // return (new BASE64Encoder()).encodeBuffer(key);
+        return Base64.encodeBase64String(key);
     }
 
     /**
@@ -239,7 +239,8 @@ public class SignUtils {
      * @throws Exception
      */
     public static byte[] decryptBASE64(String key) throws Exception {
-        return (new BASE64Decoder()).decodeBuffer(key);
+        //return (new BASE64Decoder()).decodeBuffer(key);
+        return Base64.decodeBase64(key);
     }
 
 }

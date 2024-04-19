@@ -13,6 +13,7 @@ public class SdkConfig {
     private static final String DEFAULT_PAY_BASE_URL = "https://spay-cloud.fuioupay.com";
 
     private String publicKey;
+    private String appId;
     private String privateKey;
     private String insCd;
     private String mchntCd;

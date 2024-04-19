@@ -1,5 +1,6 @@
 package com.zoeyun.fuiou.sdk.service.impl;
 
+import com.zoeyun.fuiou.sdk.bean.BasePayResult;
 import com.zoeyun.fuiou.sdk.error.SdkErrorException;
 import com.zoeyun.fuiou.sdk.result.PayOrderNotifyResult;
 import lombok.SneakyThrows;
@@ -26,6 +27,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.net.ssl.SSLContext;
+import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
@@ -114,6 +116,17 @@ public class PayServiceApacheHttpImpl extends BasePayServiceImpl {
 
     @Override
     public PayOrderNotifyResult parseOrderNotifyResult(String xmlData) throws SdkErrorException {
-        return null;
+        String xml = null;
+        try {
+            xml = URLDecoder.decode(xmlData, "GBK");
+            log.info("支付异步通知请求参数：{}", xml);
+            PayOrderNotifyResult result = BasePayResult.fromXML(xml, PayOrderNotifyResult.class);
+            log.debug("支付异步通知请求解析后的对象：{}", result);
+            result.checkResult(sdkConfig, false);
+            return result;
+        } catch (UnsupportedEncodingException e) {
+            throw new SdkErrorException(e.getMessage());
+        }
+
     }
 }
