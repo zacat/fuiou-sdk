@@ -24,7 +24,6 @@ import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import sun.net.www.protocol.https.DefaultHostnameVerifier;
 
 import javax.net.ssl.SSLContext;
 import java.net.URLDecoder;
@@ -43,7 +42,7 @@ public class PayServiceApacheHttpImpl extends BasePayServiceImpl {
     @SneakyThrows
     private UrlEncodedFormEntity createEntry(String requestStr) {
         String reqBody = URLEncoder.encode(requestStr, "GBK");
-        System.out.println("==============================编码后字符串==============================\r\n" + reqBody);
+        //System.out.println("==============================编码后字符串==============================\r\n" + reqBody);
         List<NameValuePair> formparams = new ArrayList<>();
         formparams.add(new BasicNameValuePair("req", reqBody));
         return new UrlEncodedFormEntity(formparams, "GBK");
@@ -91,7 +90,7 @@ public class PayServiceApacheHttpImpl extends BasePayServiceImpl {
 
     @Override
     public String post(String url, String requestStr, boolean useKey) throws SdkErrorException {
-        System.out.println("==============================待编码字符串==============================\r\n" + requestStr);
+        //System.out.println("==============================待编码字符串==============================\r\n" + requestStr);
         try {
             HttpClientBuilder httpClientBuilder = this.createHttpClientBuilder(useKey);
             HttpPost httpPost = this.createHttpPost(url, requestStr);

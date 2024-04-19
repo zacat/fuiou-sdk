@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import sun.misc.BASE64Decoder;
 import sun.misc.BASE64Encoder;
 
+
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.security.KeyFactory;
@@ -132,7 +133,7 @@ public class SignUtils {
         if (StringUtils.endsWith(preSignStr, "&")) {
             preSignStr = StringUtils.removeEnd(preSignStr, "&");
         }
-        System.out.println("==============================待签名字符串==============================\r\n" + preSignStr);
+        //System.out.println("==============================待签名字符串==============================\r\n" + preSignStr);
         // 解密由base64编码的私钥
         byte[] bytesKey = (new BASE64Decoder()).decodeBuffer(privateKey);
         // 构造PKCS8EncodedKeySpec对象
@@ -203,7 +204,7 @@ public class SignUtils {
             preSignStr = StringUtils.removeEnd(preSignStr, "&");
         }
 
-        System.out.println("==============================待签名字符串==============================\r\n" + preSignStr);
+        //System.out.println("==============================待签名字符串==============================\r\n" + preSignStr);
         // 解密由base64编码的公钥
         byte[] keyBytes = decryptBASE64(publicKey);
         // 构造X509EncodedKeySpec对象
