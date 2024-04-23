@@ -87,6 +87,16 @@ public abstract class BasePayServiceImpl implements PayService {
     }
 
     @Override
+    public RefundQueryResult refundQuery(RefundQueryRequest request) throws SdkErrorException {
+        request.checkAndSign(sdkConfig);
+        String url = this.getPayBaseUrl() + "/refundQuery";
+        String responseContent = this.post(url, request.toXML(), true);
+        RefundQueryResult result = BasePayResult.fromXML(responseContent, RefundQueryResult.class);
+        result.checkResult(sdkConfig, true);
+        return result;
+    }
+
+    @Override
     public PayOrderNotifyResult parseOrderNotifyResult(String xmlData) throws SdkErrorException {
         String xml = null;
         try {
@@ -99,6 +109,25 @@ public abstract class BasePayServiceImpl implements PayService {
         } catch (UnsupportedEncodingException e) {
             throw new SdkErrorException(e.getMessage());
         }
+    }
 
+    @Override
+    public CloseOrderResult close(CloseOrderRequest request) throws SdkErrorException {
+        request.checkAndSign(sdkConfig);
+        String url = this.getPayBaseUrl() + "/closeorder";
+        String responseContent = this.post(url, request.toXML(), true);
+        CloseOrderResult result = BasePayResult.fromXML(responseContent, CloseOrderResult.class);
+        result.checkResult(sdkConfig, true);
+        return result;
+    }
+
+    @Override
+    public CancelOrderResult cancel(CancelOrderRequest request) throws SdkErrorException {
+        request.checkAndSign(sdkConfig);
+        String url = this.getPayBaseUrl() + "/cancelorder";
+        String responseContent = this.post(url, request.toXML(), true);
+        CancelOrderResult result = BasePayResult.fromXML(responseContent, CancelOrderResult.class);
+        result.checkResult(sdkConfig, true);
+        return result;
     }
 }

@@ -47,6 +47,13 @@ public interface PayService {
     CommonQueryResult query(CommonQueryRequest request) throws SdkErrorException;
 
     CommonRefundResult refund(CommonRefundRequest request) throws SdkErrorException;
+
+    RefundQueryResult refundQuery(RefundQueryRequest request) throws SdkErrorException;
+
+    CloseOrderResult close(CloseOrderRequest request) throws SdkErrorException;
+
+    CancelOrderResult cancel(CancelOrderRequest request) throws SdkErrorException;
+
     PayOrderNotifyResult parseOrderNotifyResult(String xmlData) throws SdkErrorException;
 
 }
