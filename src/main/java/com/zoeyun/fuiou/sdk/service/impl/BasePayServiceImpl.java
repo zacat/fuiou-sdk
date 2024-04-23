@@ -3,13 +3,8 @@ package com.zoeyun.fuiou.sdk.service.impl;
 import com.zoeyun.fuiou.sdk.bean.BasePayResult;
 import com.zoeyun.fuiou.sdk.config.SdkConfig;
 import com.zoeyun.fuiou.sdk.error.SdkErrorException;
-import com.zoeyun.fuiou.sdk.request.MicropayRequest;
-import com.zoeyun.fuiou.sdk.request.PreCreateRequest;
-import com.zoeyun.fuiou.sdk.request.WxPreCreateRequest;
-import com.zoeyun.fuiou.sdk.result.MicropayResult;
-import com.zoeyun.fuiou.sdk.result.PayOrderNotifyResult;
-import com.zoeyun.fuiou.sdk.result.PreCreateResult;
-import com.zoeyun.fuiou.sdk.result.WxPreCreateResult;
+import com.zoeyun.fuiou.sdk.request.*;
+import com.zoeyun.fuiou.sdk.result.*;
 import com.zoeyun.fuiou.sdk.service.PayService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -71,6 +66,25 @@ public abstract class BasePayServiceImpl implements PayService {
         return result;
     }
 
+    @Override
+    public CommonQueryResult query(CommonQueryRequest request) throws SdkErrorException {
+        request.checkAndSign(sdkConfig);
+        String url = this.getPayBaseUrl() + "/commonQuery";
+        String responseContent = this.post(url, request.toXML(), true);
+        CommonQueryResult result = BasePayResult.fromXML(responseContent, CommonQueryResult.class);
+        result.checkResult(sdkConfig, true);
+        return result;
+    }
+
+    @Override
+    public CommonRefundResult refund(CommonRefundRequest request) throws SdkErrorException {
+        request.checkAndSign(sdkConfig);
+        String url = this.getPayBaseUrl() + "/commonRefund";
+        String responseContent = this.post(url, request.toXML(), true);
+        CommonRefundResult result = BasePayResult.fromXML(responseContent, CommonRefundResult.class);
+        result.checkResult(sdkConfig, true);
+        return result;
+    }
 
     @Override
     public PayOrderNotifyResult parseOrderNotifyResult(String xmlData) throws SdkErrorException {
