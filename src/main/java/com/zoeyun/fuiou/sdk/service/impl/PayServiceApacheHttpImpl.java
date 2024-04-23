@@ -114,19 +114,4 @@ public class PayServiceApacheHttpImpl extends BasePayServiceImpl {
         }
     }
 
-    @Override
-    public PayOrderNotifyResult parseOrderNotifyResult(String xmlData) throws SdkErrorException {
-        String xml = null;
-        try {
-            xml = URLDecoder.decode(xmlData, "GBK");
-            log.info("支付异步通知请求参数：{}", xml);
-            PayOrderNotifyResult result = BasePayResult.fromXML(xml, PayOrderNotifyResult.class);
-            log.debug("支付异步通知请求解析后的对象：{}", result);
-            result.checkResult(sdkConfig, false);
-            return result;
-        } catch (UnsupportedEncodingException e) {
-            throw new SdkErrorException(e.getMessage());
-        }
-
-    }
 }

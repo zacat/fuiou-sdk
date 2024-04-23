@@ -2,9 +2,13 @@ package com.zoeyun.fuiou.sdk.service;
 
 import com.zoeyun.fuiou.sdk.config.SdkConfig;
 import com.zoeyun.fuiou.sdk.error.SdkErrorException;
+import com.zoeyun.fuiou.sdk.request.MicropayRequest;
 import com.zoeyun.fuiou.sdk.request.PreCreateRequest;
+import com.zoeyun.fuiou.sdk.request.WxPreCreateRequest;
+import com.zoeyun.fuiou.sdk.result.MicropayResult;
 import com.zoeyun.fuiou.sdk.result.PayOrderNotifyResult;
 import com.zoeyun.fuiou.sdk.result.PreCreateResult;
+import com.zoeyun.fuiou.sdk.result.WxPreCreateResult;
 
 public interface PayService {
 
@@ -41,7 +45,11 @@ public interface PayService {
      */
     String post(String url, String requestStr, boolean useKey) throws SdkErrorException;
 
+    MicropayResult micropay(MicropayRequest request) throws SdkErrorException;
     PreCreateResult preCreate(PreCreateRequest request) throws SdkErrorException;
+    WxPreCreateResult preCreate(WxPreCreateRequest request) throws SdkErrorException;
+
+
 
 
     PayOrderNotifyResult parseOrderNotifyResult(String xmlData) throws SdkErrorException;

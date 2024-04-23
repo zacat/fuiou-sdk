@@ -8,14 +8,13 @@ import lombok.*;
 
 import java.util.Map;
 
-
 @Data
 @EqualsAndHashCode(callSuper = true)
 @Builder(builderMethodName = "newBuilder")
 @NoArgsConstructor
 @AllArgsConstructor
 @XStreamAlias("xml")
-public class PreCreateRequest extends BasePayRequest {
+public class MicropayRequest extends BasePayRequest {
 
     /**
      * 订单类型：
@@ -90,28 +89,36 @@ public class PreCreateRequest extends BasePayRequest {
     String txnBeginTs;
 
     /**
-     * 通知地址,接收富友异步通知回调地址,通知url必须为直接可访问的url,不能携带参数
+     * 扫码支付授权码，设备读取用户的条码或者二维码信息
      */
     @Required
-    @XStreamAlias("notify_url")
-    String notifyUrl;
-
+    @XStreamAlias("authCode")
+    String authCode;
 
 
     /**
-     * 子商户公众号id(后期拓展字段，请先不要填写)
+     支付场景,默认1；
+     1: 条码支付
+     2: 声波支付
+     3: 刷脸支付
+     */
+    @Required
+    @XStreamAlias("sence")
+    String sence;
+
+    /**
+     * 子商户公众号id
      */
     @XStreamAlias("reserved_sub_appid")
     String reservedSubAppid;
 
     /**
-     * 限制支付,
-     * no_credit:不能使用信用卡,
+     * 限制支付
+     * no_credit:不能使用信用卡
      * credit_group：不能使用花呗以及信用卡
      */
     @XStreamAlias("reserved_limit_pay")
     String reservedLimitPay;
-
 
     /**
      * 交易关闭时间
@@ -120,9 +127,8 @@ public class PreCreateRequest extends BasePayRequest {
     @XStreamAlias("reserved_expire_minute")
     Integer reservedExpireMinute;
 
-
     /**
-     * 富友终端号(富友终端号与TUSN号二选一),富友采购或自带机入网填此字段
+     终端序列号
      */
     @XStreamAlias("reserved_fy_term_id")
     String reservedFyTermId;
@@ -138,8 +144,9 @@ public class PreCreateRequest extends BasePayRequest {
     @XStreamAlias("reserved_fy_term_type")
     String reservedFyTermType;
 
-     /**
-     * 终端序列号
+
+    /**
+     终端序列号
      */
     @XStreamAlias("reserved_fy_term_sn")
     String reservedFyTermSn;
@@ -149,6 +156,7 @@ public class PreCreateRequest extends BasePayRequest {
      */
     @XStreamAlias("reserved_device_info")
     String reservedDeviceInfo;
+
 
     /**
      * JSON串，花呗分期示例值：{"dynamic_token_out_biz_no":"66666","hb_fq_num":"3","industry_reflux_info":{"scene_code":"metro_tradeorder","channel":"xxxx","scene_data":{"asset_name":"ALIPAY"}},"food_order_type":"qr_order"}信用卡分期示例值：{"fq_num":"3"}银联分期示例值：{"hb_fq_num":"3","industry_reflux_info":"ICBC,ABC,CCB"}
@@ -168,8 +176,6 @@ public class PreCreateRequest extends BasePayRequest {
     @XStreamAlias("reserved_alipay_store_id")
     String reservedAlipayStoreId;
 
-
-
     /**
      * 终端信息说明字段，见文档中reserved_terminal_info终端信息说明字段（259号文，终端信息）
      */
@@ -182,7 +188,11 @@ public class PreCreateRequest extends BasePayRequest {
     @XStreamAlias("reserved_business_params")
     String reservedBusinessParams;
 
-
+    /**
+     * 身份证
+     */
+    @XStreamAlias("reserved_scene_info")
+    String reservedSceneInfo;
     @Override
     protected void checkConstraints() throws SdkErrorException {
 
@@ -190,7 +200,6 @@ public class PreCreateRequest extends BasePayRequest {
 
     @Override
     protected void storeMap(Map<String, String> map) {
-        map.put("order_type", orderType);
         map.put("goods_des", goodsDes);
         map.put("goods_detail", goodsDetail);
         map.put("goods_tag", goodsTag);
@@ -200,8 +209,8 @@ public class PreCreateRequest extends BasePayRequest {
         map.put("order_amt", orderAmt.toString());
         map.put("term_ip", termIp);
         map.put("txn_begin_ts", txnBeginTs);
-        map.put("notify_url", notifyUrl);
-
+        map.put("auth_code", authCode);
+        map.put("sence", sence);
         map.put("reserved_sub_appid", reservedSubAppid);
         map.put("reserved_limit_pay", reservedLimitPay);
         map.put("reserved_expire_minute", reservedExpireMinute.toString());
@@ -214,6 +223,6 @@ public class PreCreateRequest extends BasePayRequest {
         map.put("reserved_alipay_store_id", reservedAlipayStoreId);
         map.put("reserved_terminal_info", reservedTerminalInfo);
         map.put("reserved_business_params", reservedBusinessParams);
-
+        map.put("reserved_scene_info", reservedSceneInfo);
     }
 }
