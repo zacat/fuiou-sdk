@@ -17,6 +17,30 @@ public class SdkErrorException extends Exception {
      */
     private String errorMsgEn;
 
+    public int getErrorCode() {
+        return errorCode;
+    }
+
+    public void setErrorCode(int errorCode) {
+        this.errorCode = errorCode;
+    }
+
+    public String getErrorMsg() {
+        return errorMsg;
+    }
+
+    public void setErrorMsg(String errorMsg) {
+        this.errorMsg = errorMsg;
+    }
+
+    public String getErrorMsgEn() {
+        return errorMsgEn;
+    }
+
+    public void setErrorMsgEn(String errorMsgEn) {
+        this.errorMsgEn = errorMsgEn;
+    }
+
     public SdkErrorException(int errorCode, String errorMsg) {
         this.errorCode = errorCode;
         this.errorMsg = errorMsg;
