@@ -5,8 +5,11 @@ import com.zoeyun.fuiou.sdk.annotation.Required;
 import com.zoeyun.fuiou.sdk.bean.BasePayRequest;
 import com.zoeyun.fuiou.sdk.error.SdkErrorException;
 import lombok.*;
+import org.apache.commons.lang3.StringUtils;
 
+import java.util.Arrays;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
@@ -15,6 +18,23 @@ import java.util.Map;
 @AllArgsConstructor
 @XStreamAlias("xml")
 public class MicropayRequest extends BasePayRequest {
+
+    /**
+     * 商户订单号：5~30个字符，字母数字及-、_（富友实际受理带连字符的订单号）
+     */
+    private static final Pattern MCHNT_ORDER_NO_PATTERN = Pattern.compile("^[A-Za-z0-9_-]{5,30}$");
+    /**
+     * 微信付款码：10~15开头的18位数字
+     */
+    private static final Pattern WECHAT_AUTH_CODE_PATTERN = Pattern.compile("^1[0-5]\\d{16}$");
+    /**
+     * 支付宝付款码：25~30开头的16~24位数字
+     */
+    private static final Pattern ALIPAY_AUTH_CODE_PATTERN = Pattern.compile("^(2[5-9]|30)\\d{14,22}$");
+    /**
+     * 银联二维码：62开头的19位数字
+     */
+    private static final Pattern UNIONPAY_AUTH_CODE_PATTERN = Pattern.compile("^62\\d{17}$");
 
     /**
      * 订单类型：
@@ -92,7 +112,7 @@ public class MicropayRequest extends BasePayRequest {
      * 扫码支付授权码，设备读取用户的条码或者二维码信息
      */
     @Required
-    @XStreamAlias("authCode")
+    @XStreamAlias("auth_code")
     String authCode;
 
 
@@ -195,7 +215,48 @@ public class MicropayRequest extends BasePayRequest {
     String reservedSceneInfo;
     @Override
     protected void checkConstraints() throws SdkErrorException {
+        if (orderAmt != null && orderAmt <= 0) {
+            throw new SdkErrorException("订单金额order_amt必须大于0（单位：分），实际为：" + orderAmt);
+        }
+        if (StringUtils.isNotBlank(mchntOrderNo) && !MCHNT_ORDER_NO_PATTERN.matcher(mchntOrderNo).matches()) {
+            throw new SdkErrorException("商户订单号mchnt_order_no必须为5~30个字符且只能包含字母、数字、-、_，实际为：" + mchntOrderNo);
+        }
+        if (StringUtils.isNotBlank(sence) && !Arrays.asList("1", "2", "3").contains(sence)) {
+            throw new SdkErrorException("支付场景sence非法（1:条码支付 2:声波支付 3:刷脸支付），实际为：" + sence);
+        }
+        // 条码支付时本地校验付款码格式，避免非法码透传到渠道后被拒绝（如030001授权码映射错误）
+        if ("1".equals(sence) && StringUtils.isNotBlank(authCode)) {
+            checkAuthCode();
+        }
+    }
 
+    /**
+     * 校验付款码格式是否与订单类型匹配
+     */
+    private void checkAuthCode() throws SdkErrorException {
+        String type = StringUtils.upperCase(StringUtils.trimToEmpty(orderType));
+        switch (type) {
+            case "WECHAT":
+                if (!WECHAT_AUTH_CODE_PATTERN.matcher(authCode).matches()) {
+                    throw new SdkErrorException("付款码格式不合法：微信付款码应为10~15开头的18位数字，请确认扫码获取的条码内容，实际为：" + authCode);
+                }
+                break;
+            case "ALIPAY":
+                if (!ALIPAY_AUTH_CODE_PATTERN.matcher(authCode).matches()) {
+                    throw new SdkErrorException("付款码格式不合法：支付宝付款码应为25~30开头的16~24位数字，请确认扫码获取的条码内容，实际为：" + authCode);
+                }
+                break;
+            case "UNIONPAY":
+                if (!UNIONPAY_AUTH_CODE_PATTERN.matcher(authCode).matches()) {
+                    throw new SdkErrorException("付款码格式不合法：银联二维码应为62开头的19位数字，请确认扫码获取的条码内容，实际为：" + authCode);
+                }
+                break;
+            default:
+                // 其他渠道（BESTPAY、DIGICCY等）仅要求纯数字
+                if (!StringUtils.isNumeric(authCode)) {
+                    throw new SdkErrorException("付款码auth_code应为扫码获取的数字条码内容，实际为：" + authCode);
+                }
+        }
     }
 
     @Override
@@ -206,14 +267,16 @@ public class MicropayRequest extends BasePayRequest {
         map.put("addn_inf", addnInf);
         map.put("mchnt_order_no", mchntOrderNo);
         map.put("curr_type", currType);
-        map.put("order_amt", orderAmt.toString());
+        map.put("order_amt", orderAmt == null ? null : orderAmt.toString());
         map.put("term_ip", termIp);
         map.put("txn_begin_ts", txnBeginTs);
         map.put("auth_code", authCode);
         map.put("sence", sence);
         map.put("reserved_sub_appid", reservedSubAppid);
         map.put("reserved_limit_pay", reservedLimitPay);
-        map.put("reserved_expire_minute", reservedExpireMinute.toString());
+        if (reservedExpireMinute != null) {
+            map.put("reserved_expire_minute", reservedExpireMinute.toString());
+        }
         map.put("reserved_fy_term_id", reservedFyTermId);
         map.put("reserved_fy_term_type", reservedFyTermType);
         map.put("reserved_fy_term_sn", reservedFyTermSn);

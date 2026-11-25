@@ -274,6 +274,32 @@ public abstract class BasePayResult implements Serializable {
         return new String[0];
     }
     /**
+     * 成功状态码.
+     */
+    private static final List<String> SUCCESS_CODES = Lists.newArrayList("000000");
+
+    /**
+     * 处理中的中间状态码：支付并未失败，订单已受理，
+     * 不应抛异常，调用方应通过订单查询轮询最终支付结果。
+     * 030010：等待用户支付中（被扫支付时用户端需输密码/大额确认等场景）
+     */
+    private static final List<String> PENDING_CODES = Lists.newArrayList("030010");
+
+    /**
+     * 交易是否成功.
+     */
+    public boolean isSuccess() {
+        return SUCCESS_CODES.contains(StringUtils.trimToEmpty(getResultCode()).toUpperCase());
+    }
+
+    /**
+     * 交易是否处于处理中（如：030010等待用户支付中），需轮询订单查询获取最终结果.
+     */
+    public boolean isPaymentPending() {
+        return PENDING_CODES.contains(StringUtils.trimToEmpty(getResultCode()).toUpperCase());
+    }
+
+    /**
      * 校验返回结果签名.
      *
      * @param checkSuccess 是否同时检查结果是否成功
@@ -290,9 +316,13 @@ public abstract class BasePayResult implements Serializable {
 
         //校验结果是否成功
         if (checkSuccess) {
-            List<String> successStrings = Lists.newArrayList("000000");
-            if (!successStrings.contains(StringUtils.trimToEmpty(getResultCode()).toUpperCase())
-                    || !successStrings.contains(StringUtils.trimToEmpty(getResultCode()).toUpperCase())) {
+            //中间状态（如等待用户支付）不视为失败，正常返回由调用方轮询查询
+            if (isPaymentPending()) {
+                this.getLogger().info("支付处理中，返回代码：{}，返回信息：{}，请通过订单查询轮询最终支付结果",
+                        getResultCode(), getResultMsg());
+                return;
+            }
+            if (!isSuccess()) {
                 StringBuilder errorMsg = new StringBuilder();
                 if (getResultCode() != null) {
                     errorMsg.append("返回代码：").append(getResultCode());

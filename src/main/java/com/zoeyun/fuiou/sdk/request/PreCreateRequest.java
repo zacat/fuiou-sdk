@@ -197,14 +197,16 @@ public class PreCreateRequest extends BasePayRequest {
         map.put("addn_inf", addnInf);
         map.put("mchnt_order_no", mchntOrderNo);
         map.put("curr_type", currType);
-        map.put("order_amt", orderAmt.toString());
+        map.put("order_amt", orderAmt == null ? null : orderAmt.toString());
         map.put("term_ip", termIp);
         map.put("txn_begin_ts", txnBeginTs);
         map.put("notify_url", notifyUrl);
 
         map.put("reserved_sub_appid", reservedSubAppid);
         map.put("reserved_limit_pay", reservedLimitPay);
-        map.put("reserved_expire_minute", reservedExpireMinute.toString());
+        if (reservedExpireMinute != null) {
+            map.put("reserved_expire_minute", reservedExpireMinute.toString());
+        }
         map.put("reserved_fy_term_id", reservedFyTermId);
         map.put("reserved_fy_term_type", reservedFyTermType);
         map.put("reserved_fy_term_sn", reservedFyTermSn);

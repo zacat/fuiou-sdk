@@ -1,6 +1,7 @@
 package com.zoeyun.fuiou.sdk.utils.xml;
 
 import com.thoughtworks.xstream.XStream;
+import com.thoughtworks.xstream.converters.SingleValueConverter;
 import com.thoughtworks.xstream.converters.basic.*;
 import com.thoughtworks.xstream.converters.collections.CollectionConverter;
 import com.thoughtworks.xstream.converters.reflection.PureJavaReflectionProvider;
@@ -67,13 +68,13 @@ public class XStreamInitializer {
             @Override
             protected void setupConverters() {
                 registerConverter(new NullConverter(), PRIORITY_VERY_HIGH);
-                registerConverter(new IntConverter(), PRIORITY_NORMAL);
-                registerConverter(new FloatConverter(), PRIORITY_NORMAL);
-                registerConverter(new DoubleConverter(), PRIORITY_NORMAL);
-                registerConverter(new LongConverter(), PRIORITY_NORMAL);
-                registerConverter(new ShortConverter(), PRIORITY_NORMAL);
+                registerConverter(new EmptyStringAsNullConverter(new IntConverter()), PRIORITY_NORMAL);
+                registerConverter(new EmptyStringAsNullConverter(new FloatConverter()), PRIORITY_NORMAL);
+                registerConverter(new EmptyStringAsNullConverter(new DoubleConverter()), PRIORITY_NORMAL);
+                registerConverter(new EmptyStringAsNullConverter(new LongConverter()), PRIORITY_NORMAL);
+                registerConverter(new EmptyStringAsNullConverter(new ShortConverter()), PRIORITY_NORMAL);
                 registerConverter(new BooleanConverter(), PRIORITY_NORMAL);
-                registerConverter(new ByteConverter(), PRIORITY_NORMAL);
+                registerConverter(new EmptyStringAsNullConverter(new ByteConverter()), PRIORITY_NORMAL);
                 registerConverter(new StringConverter(), PRIORITY_NORMAL);
                 registerConverter(new DateConverter(), PRIORITY_NORMAL);
                 registerConverter(new CollectionConverter(getMapper()), PRIORITY_NORMAL);
@@ -94,5 +95,35 @@ public class XStreamInitializer {
         }
         xstream.setClassLoader(classLoader);
         return xstream;
+    }
+
+    /**
+     * 富友失败响应中数值字段常返回空字符串（如{@code <total_amount></total_amount>}），
+     * XStream内置转换器解析空串会抛NumberFormatException，这里统一将空串按null处理。
+     */
+    private static class EmptyStringAsNullConverter implements SingleValueConverter {
+        private final SingleValueConverter delegate;
+
+        EmptyStringAsNullConverter(SingleValueConverter delegate) {
+            this.delegate = delegate;
+        }
+
+        @Override
+        public boolean canConvert(Class type) {
+            return delegate.canConvert(type);
+        }
+
+        @Override
+        public Object fromString(String str) {
+            if (str == null || str.trim().isEmpty()) {
+                return null;
+            }
+            return delegate.fromString(str);
+        }
+
+        @Override
+        public String toString(Object obj) {
+            return delegate.toString(obj);
+        }
     }
 }
