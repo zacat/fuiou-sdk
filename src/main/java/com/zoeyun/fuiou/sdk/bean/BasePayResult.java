@@ -323,16 +323,15 @@ public abstract class BasePayResult implements Serializable {
                 return;
             }
             if (!isSuccess()) {
-                StringBuilder errorMsg = new StringBuilder();
+                StringBuilder errorMsg = new StringBuilder("结果业务代码异常");
                 if (getResultCode() != null) {
-                    errorMsg.append("返回代码：").append(getResultCode());
+                    errorMsg.append("，返回代码：").append(getResultCode());
                 }
                 if (getResultMsg() != null) {
                     errorMsg.append("，返回信息：").append(getResultMsg());
                 }
-                String fmt = String.format("\n结果业务代码异常，返回结果：%s,\n%s", map, errorMsg.toString());
-                this.getLogger().error(fmt);
-                throw new SdkErrorException(fmt);
+                this.getLogger().error("{}，返回结果：{}", errorMsg, map);
+                throw new SdkErrorException(errorMsg.toString());
             }
         }
     }

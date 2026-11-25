@@ -42,13 +42,12 @@ public class SdkErrorException extends Exception {
     }
 
     public SdkErrorException(int errorCode, String errorMsg) {
+        super(errorMsg);
         this.errorCode = errorCode;
         this.errorMsg = errorMsg;
     }
 
     public SdkErrorException(String errorMsg) {
-        this.errorCode = 400;
-        this.errorMsg = errorMsg;
+        this(400, errorMsg);
     }
-
 }
